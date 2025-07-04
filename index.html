@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>тебе</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html, body {
+            height: 100%;
+            overflow: hidden;
+            touch-action: manipulation;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #ff6b8b, #ff8e53, #ffb6c1);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            position: relative;
+            overflow: hidden;
+            padding: 10px;
+            transition: background 1s ease;
+        }
+
+        /* Убираем полосы по краям */
+        body::before {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            right: -10px;
+            bottom: -10px;
+            background: inherit;
+            z-index: -1;
+            filter: blur(0px);
+        }
+
+        .mode-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            z-index: 100;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+            transition: all 0.4s ease;
+        }
+
+        .mode-toggle:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: rotate(90deg) scale(1.1);
+            box-shadow: 0 0 20px rgba(255, 105, 180, 0.4);
+        }
+
+        .mode-toggle i {
+            font-size: 24px;
+            color: #ff6b8b;
+        }
+
+        .container {
+            position: relative;
+            width: 100%;
+            max-width: 95%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+            text-align: center;
+            margin: 0 auto;
+        }
+
+        /* Идеальное CSS сердце */
+        .heart-wrapper {
+            position: relative;
+            width: min(65vmin, 220px);
+            height: min(65vmin, 220px);
+            margin: 10px 0;
+            filter: drop-shadow(0 0 15px rgba(255, 0, 0, 0.5));
+            cursor: pointer;
+            transition: all 0.8s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+        }
+
+        .heart {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, #ff416c, #ff4b2b);
+            transform: rotate(45deg);
+            animation: pulse 1.8s infinite;
+            border-radius: 0 0 10px 0;
+            box-shadow: 
+                0 0 25px rgba(255, 0, 0, 0.3),
+                inset 0 0 15px rgba(255, 255, 255, 0.3);
+            transition: all 0.8s ease;
+        }
+
+        /* Идеальная симметрия */
+        .heart::before,
+        .heart::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: inherit;
+            border-radius: 50%;
+            transition: all 0.8s ease;
+        }
+
+        .heart::before {
+            top: -50%;
+            left: 0;
+        }
+
+        .heart::after {
+            top: 0;
+            left: -50%;
+        }
+
+        .heart-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-45deg);
+            width: 90%;
+            text-align: center;
+            z-index: 20;
+            padding: 10px;
+            transition: all 0.8s ease;
+        }
+
+        /* Стили для букета цветов */
+        .bouquet-wrapper {
+            position: relative;
+            width: min(70vmin, 250px);
+            height: min(70vmin, 250px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transform: scale(0.5) translateY(50px);
+            pointer-events: none;
+            transition: all 0.8s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+        }
+
+        .vase {
+            position: absolute;
+            bottom: 0;
+            width: 40%;
+            height: 30%;
+            background: linear-gradient(to right, #a1c4fd, #c2e9fb);
+            border-radius: 5px 5px 15px 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            z-index: 5;
+        }
+
+        .flower {
+            position: absolute;
+            bottom: 30%;
+            width: 4px;
+            background: linear-gradient(to top, #2E8B57, #3CB371);
+            transform-origin: bottom;
+            z-index: 2;
+            border-radius: 2px;
+        }
+
+        .flower-head {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            border-radius: 50% 50% 50% 50%;
+            transform: translateX(-50%);
+            z-index: 3;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        /* Разные цветы в букете */
+        .flower:nth-child(1) { height: 60%; left: 50%; transform: rotate(-5deg); }
+        .flower:nth-child(2) { height: 70%; left: 40%; transform: rotate(-15deg); }
+        .flower:nth-child(3) { height: 65%; left: 60%; transform: rotate(5deg); }
+        .flower:nth-child(4) { height: 75%; left: 35%; transform: rotate(-25deg); }
+        .flower:nth-child(5) { height: 55%; left: 65%; transform: rotate(15deg); }
+        .flower:nth-child(6) { height: 80%; left: 45%; transform: rotate(-10deg); }
+        .flower:nth-child(7) { height: 70%; left: 55%; transform: rotate(10deg); }
+
+        .flower:nth-child(1) .flower-head { top: -15px; background: radial-gradient(circle, #ff6b8b, #ff416c); }
+        .flower:nth-child(2) .flower-head { top: -15px; background: radial-gradient(circle, #ff8e53, #ff6b00); }
+        .flower:nth-child(3) .flower-head { top: -15px; background: radial-gradient(circle, #ffd166, #ffb700); }
+        .flower:nth-child(4) .flower-head { top: -15px; background: radial-gradient(circle, #06d6a0, #049c75); }
+        .flower:nth-child(5) .flower-head { top: -15px; background: radial-gradient(circle, #118ab2, #0a5a75); }
+        .flower:nth-child(6) .flower-head { top: -15px; background: radial-gradient(circle, #ef476f, #d00040); }
+        .flower:nth-child(7) .flower-head { top: -15px; background: radial-gradient(circle, #9b5de5, #6a2cce); }
+
+        .bouquet-wrapper.active {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+            pointer-events: all;
+        }
+
+        .bouquet-wrapper.active .flower {
+            animation: sway 4s infinite ease-in-out;
+        }
+
+        .bouquet-wrapper.active .flower:nth-child(2) { animation-delay: 0.1s; }
+        .bouquet-wrapper.active .flower:nth-child(3) { animation-delay: 0.2s; }
+        .bouquet-wrapper.active .flower:nth-child(4) { animation-delay: 0.3s; }
+        .bouquet-wrapper.active .flower:nth-child(5) { animation-delay: 0.4s; }
+        .bouquet-wrapper.active .flower:nth-child(6) { animation-delay: 0.5s; }
+        .bouquet-wrapper.active .flower:nth-child(7) { animation-delay: 0.6s; }
+
+        .heart-wrapper.hidden {
+            opacity: 0;
+            transform: scale(0.5);
+            pointer-events: none;
+        }
+
+        .name {
+            font-size: min(7vmin, 2.8rem);
+            font-weight: 700;
+            color: white;
+            text-shadow: 0 0 8px rgba(0, 0, 0, 0.3);
+            margin-bottom: min(2vmin, 8px);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .name:hover {
+            transform: scale(1.1);
+            text-shadow: 0 0 15px rgba(255, 255, 255, 0.8);
+        }
+
+        .telegram-link {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(8px);
+            border-radius: 20px;
+            padding: min(2vmin, 8px) min(4vmin, 16px);
+            color: white;
+            font-size: min(3.5vmin, 1rem);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 0 8px rgba(255, 0, 0, 0.3);
+            margin: min(1.5vmin, 6px) 0;
+            white-space: nowrap;
+        }
+
+        .telegram-link i {
+            margin-right: min(1.5vmin, 6px);
+        }
+
+        .telegram-link:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 0 15px rgba(255, 0, 0, 0.5);
+        }
+
+        .hearts {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+            overflow: hidden;
+        }
+
+        .hearts span {
+            position: absolute;
+            display: block;
+            width: min(3vmin, 12px);
+            height: min(3vmin, 12px);
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 0 0 4px 0;
+            animation: float 15s linear infinite;
+            filter: drop-shadow(0 0 4px rgba(255, 0, 0, 0.5));
+        }
+
+        .hearts span::before,
+        .hearts span::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: inherit;
+            border-radius: 50%;
+        }
+
+        .hearts span::before {
+            top: -50%;
+            left: 0;
+        }
+
+        .hearts span::after {
+            top: 0;
+            left: -50%;
+        }
+        
+        .creator-btn {
+            position: fixed;
+            bottom: min(4vmin, 15px);
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: min(4vmin, 18px);
+            padding: min(2vmin, 7px) min(4vmin, 16px);
+            color: white;
+            font-size: min(3vmin, 0.85rem);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            box-shadow: 0 0 6px rgba(255, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            z-index: 20;
+            left: 50%;
+            transform: translateX(-50%);
+            white-space: nowrap;
+        }
+        
+        .creator-btn:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateX(-50%) translateY(-2px);
+            box-shadow: 0 0 12px rgba(255, 0, 0, 0.4);
+        }
+        
+        .creator-btn i {
+            margin-right: min(1.5vmin, 6px);
+            color: #ffeb3b;
+            font-size: 0.9em;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: rotate(45deg) scale(1);
+            }
+            50% {
+                transform: rotate(45deg) scale(1.04);
+            }
+            100% {
+                transform: rotate(45deg) scale(1);
+            }
+        }
+
+        @keyframes float {
+            0% {
+                transform: rotate(45deg) translateY(100vh) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: rotate(45deg) translateY(-100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        @keyframes sway {
+            0%, 100% {
+                transform: rotate(-5deg);
+            }
+            50% {
+                transform: rotate(5deg);
+            }
+        }
+
+        /* Адаптация для очень маленьких экранов */
+        @media (max-height: 500px) {
+            .heart-wrapper, .bouquet-wrapper {
+                width: min(50vmin, 180px);
+                height: min(50vmin, 180px);
+            }
+            
+            .name {
+                font-size: min(6vmin, 1.9rem);
+            }
+            
+            .creator-btn {
+                position: relative;
+                margin-top: 8px;
+                bottom: unset;
+                transform: translateX(-50%);
+            }
+            
+            .flower-head {
+                width: 22px;
+                height: 22px;
+                font-size: 18px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="hearts" id="hearts"></div>
+    
+    <!-- Кнопка переключения режимов -->
+    <div class="mode-toggle" id="modeToggle">
+        <i class="fas fa-seedling"></i>
+    </div>
+    
+    <div class="container">
+        <!-- Идеальное CSS сердце -->
+        <div class="heart-wrapper" id="heartWrapper">
+            <div class="heart"></div>
+            <div class="heart-content">
+                <div class="name" id="name">Вика</div>
+                <a href="https://t.me/sadwasgirl" class="telegram-link" target="_blank">
+                    <i class="fab fa-telegram"></i> @sadwasgirl
+                </a>
+            </div>
+        </div>
+        
+        <!-- Красивый букет цветов -->
+        <div class="bouquet-wrapper" id="bouquetWrapper">
+            <div class="vase"></div>
+            <div class="flower">
+                <div class="flower-head">🌹</div>
+            </div>
+            <div class="flower">
+                <div class="flower-head">🌻</div>
+            </div>
+            <div class="flower">
+                <div class="flower-head">🌸</div>
+            </div>
+            <div class="flower">
+                <div class="flower-head">🌼</div>
+            </div>
+            <div class="flower">
+                <div class="flower-head">🌷</div>
+            </div>
+            <div class="flower">
+                <div class="flower-head">💐</div>
+            </div>
+            <div class="flower">
+                <div class="flower-head">🌺</div>
+            </div>
+        </div>
+    </div>
+
+    <a href="https://t.me/LeakGood" class="creator-btn" target="_blank">
+        <i class="fas fa-heart"></i> Сделано для тебя от @LeakGood
+    </a>
+
+    <script>
+        // Создаем летающие сердечки на заднем фоне
+        const heartsContainer = document.getElementById('hearts');
+        const heartCount = 18;
+        
+        for (let i = 0; i < heartCount; i++) {
+            const heart = document.createElement('span');
+            heart.style.left = Math.random() * 100 + 'vw';
+            heart.style.animationDelay = Math.random() * 5 + 's';
+            heart.style.animationDuration = (Math.random() * 10 + 10) + 's';
+            heart.style.opacity = Math.random() * 0.5 + 0.2;
+            heartsContainer.appendChild(heart);
+        }
+        
+        // Анимация при клике на имя
+        const nameElement = document.getElementById('name');
+        nameElement.addEventListener('click', function() {
+            this.style.transform = 'scale(1.25)';
+            this.style.color = '#fff9c4';
+            this.style.textShadow = '0 0 20px rgba(255, 249, 196, 0.8)';
+            
+            setTimeout(() => {
+                this.style.transform = 'scale(1)';
+                this.style.color = 'white';
+                this.style.textShadow = '0 0 8px rgba(0, 0, 0, 0.3)';
+            }, 400);
+            
+            // Открываем ссылку на Telegram
+            window.open('https://t.me/sadwasgirl', '_blank');
+        });
+        
+        // Переключение между сердцем и букетом
+        const modeToggle = document.getElementById('modeToggle');
+        const heartWrapper = document.getElementById('heartWrapper');
+        const bouquetWrapper = document.getElementById('bouquetWrapper');
+        let isFlowerMode = false;
+        
+        modeToggle.addEventListener('click', function() {
+            isFlowerMode = !isFlowerMode;
+            
+            if (isFlowerMode) {
+                heartWrapper.classList.add('hidden');
+                bouquetWrapper.classList.add('active');
+                document.body.style.background = 'linear-gradient(135deg, #a1c4fd, #c2e9fb, #fbc2eb)';
+                this.innerHTML = '<i class="fas fa-heart"></i>';
+            } else {
+                heartWrapper.classList.remove('hidden');
+                bouquetWrapper.classList.remove('active');
+                document.body.style.background = 'linear-gradient(135deg, #ff9a9e, #fad0c4, #fbc2eb)';
+                this.innerHTML = '<i class="fas fa-seedling"></i>';
+            }
+            
+            // Анимация кнопки
+            this.style.transform = 'rotate(360deg) scale(1.2)';
+            setTimeout(() => {
+                this.style.transform = '';
+            }, 400);
+        });
+        
+        // Гарантируем, что градиент покрывает весь экран
+        window.addEventListener('resize', function() {
+            document.body.style.backgroundSize = 'cover';
+        });
+        
+        // Инициализация
+        document.body.style.backgroundSize = 'cover';
+    </script>
+</body>
+              </html>
